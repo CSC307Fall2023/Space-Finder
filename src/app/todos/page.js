@@ -48,7 +48,7 @@ export default function ToDos() {
         todos[e].done = !todos[e].done;
         console.log(id);
         setTodos([...todos]);
-        fetch(`/api/todos/${id}`, { method: "put", body: JSON.stringify({value: todos[e].value, done: true}) }).then((response) => response.ok && response.json());
+        fetch(`/api/todos/${id}`, { method: "put", body: JSON.stringify({value: todos[e].value, done: todos[e].done}) }).then((response) => response.ok && response.json());
     }
 
     useEffect(() => {
