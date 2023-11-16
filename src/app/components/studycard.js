@@ -79,7 +79,7 @@ export default function StudyCard(props) {
         onClick={() => {!open && (window.location.href = '/studyspot')}}
       >
       <CardContent>
-      <Button sx={{ position: 'absolute', top: 20, left: 10, zIndex: 1, color: 'black',}} onClick={(event) => {event.stopPropagation(); toggleStar();}}>
+      <Button component="span" sx={{ position: 'absolute', top: 20, left: 10, zIndex: 1, color: 'black',}} onClick={(event) => {event.stopPropagation(); toggleStar();}}>
         {isStarred ? <BookmarkAddedIcon sx={{fontSize: 30, color: 'red'}} /> : <BookmarkAddIcon sx={{fontSize: 30, color: 'white'}} />}
       </Button>
         <CardMedia
@@ -99,6 +99,7 @@ export default function StudyCard(props) {
               {studyName}
             </Typography>
             <Button
+              component="span"
               onClick={(event) => {event.stopPropagation(); handleMenuClick(event);}}
               sx={{ color: 'black', fontWeight: 'bold' }}
             >
@@ -195,7 +196,7 @@ export default function StudyCard(props) {
       </CardContent>
       <CardActions sx={{ mt: -3 }}>
         <Box sx={{ ml: 4, mb: 2, ':hover': { cursor: 'pointer' }}}>
-            <Button sx={{ bgcolor: 'black', color: 'white', ':hover': { bgcolor: 'gray'}}} size="small">Comments</Button>
+            <Button component="span" sx={{ bgcolor: 'black', color: 'white', ':hover': { bgcolor: 'gray'}}} size="small">Comments</Button>
         </Box>
       </CardActions>
       </CardActionArea>
