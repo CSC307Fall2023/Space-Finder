@@ -6,6 +6,7 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import { Box, List, ListItem, Menu, MenuItem } from '@mui/material';
 import CardMedia from '@mui/material/CardMedia';
+import CardActionArea from "@mui/material/CardActionArea";
 import { useState } from 'react';
 import BookmarkAddIcon from '@mui/icons-material/BookmarkAdd';
 import BookmarkAddedIcon from '@mui/icons-material/BookmarkAdded';
@@ -33,32 +34,31 @@ export default function StudyCard(props) {
     setIsStarred(!isStarred);
   }
   
-    const handleMenuClick = (event) => {
-      setAnchorEl(event.currentTarget);
-    };
-  
-    const handleMenuClose = () => {
-      setAnchorEl(null);
-    };
-    const handleCheckIn = () => {
-      setAnchorEl(null); // Close the menu when "Check In" is clicked
-      displayCheckInMessage(); // Function to display a pop-up message
-    };
-  
-    const displayCheckInMessage = () => {
-      alert('Yay! You\'ve checked in.');
-    };
-    const handleRatingChange = (event, newValue) => {
-      setRatingState(newValue);
-    };
-    const handleReportButton = (event, newValue) => {
-      setOpen(true);
-      setFormState({});
-    };
-    function handleClose() {
-      setOpen(false);
-    }
-  
+  const handleMenuClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+  const handleCheckIn = () => {
+    setAnchorEl(null); // Close the menu when "Check In" is clicked
+    displayCheckInMessage(); // Function to display a pop-up message
+  };
+
+  const displayCheckInMessage = () => {
+    alert('Yay! You\'ve checked in.');
+  };
+  const handleRatingChange = (event, newValue) => {
+    setRatingState(newValue);
+  };
+  const handleReportButton = (event, newValue) => {
+    setOpen(true);
+    setFormState({});
+  };
+  function handleClose() {
+    setOpen(false);
+  }
 
   return (
     <Card
@@ -74,10 +74,14 @@ export default function StudyCard(props) {
       }}
       
     >
+      <CardActionArea
+        disableRipple
+        onClick={() => {!open && (window.location.href = '/studyspot')}}
+      >
       <CardContent>
-      <Button sx={{ position: 'absolute', top: 20, left: 10, zIndex: 1, color: 'black',}} onClick={toggleStar}>
-                {isStarred ? <BookmarkAddedIcon sx={{fontSize: 30, color: 'white'}} /> : <BookmarkAddIcon sx={{fontSize: 30, color: 'white'}} />}
-            </Button>
+      <Button sx={{ position: 'absolute', top: 20, left: 10, zIndex: 1, color: 'black',}} onClick={(event) => {event.stopPropagation(); toggleStar();}}>
+        {isStarred ? <BookmarkAddedIcon sx={{fontSize: 30, color: 'red'}} /> : <BookmarkAddIcon sx={{fontSize: 30, color: 'white'}} />}
+      </Button>
         <CardMedia
           component="img"
           sx={{
@@ -88,7 +92,6 @@ export default function StudyCard(props) {
           }}
           image={"https://picsum.photos/325/200"}
           alt={"study"}
-          onClick={() => {window.location.href = '/studyspot'}}
         />
         <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'left', p: 2 }}>
           <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -96,7 +99,7 @@ export default function StudyCard(props) {
               {studyName}
             </Typography>
             <Button
-              onClick={handleMenuClick}
+              onClick={(event) => {event.stopPropagation(); handleMenuClick(event);}}
               sx={{ color: 'black', fontWeight: 'bold' }}
             >
               Actions
@@ -104,21 +107,21 @@ export default function StudyCard(props) {
             <Menu
               anchorEl={anchorEl}
               open={Boolean(anchorEl)}
-              onClose={handleMenuClose}
+              onClose={(event) => {event.stopPropagation(); handleMenuClose();}}
             >
-              <MenuItem onClick={handleCheckIn}>Check In</MenuItem>
-              <MenuItem onClick={handleMenuClose}>Rate: 
+              <MenuItem onClick={(event) => {event.stopPropagation(); handleCheckIn();}}>Check In</MenuItem>
+              <MenuItem onClick={(event) => {event.stopPropagation(); handleMenuClose();}}>Rate: 
               <Rating
             name="rating"
             value={ratingState}
             precision={0.5}
-            onChange={handleRatingChange}/>
+            onChange={(event, newValue) => {event.stopPropagation(); handleRatingChange(event, newValue)}}/>
           </MenuItem>
-              <MenuItem onClick={handleReportButton}>Report</MenuItem>
+              <MenuItem onClick={(event, newValue) => {event.stopPropagation(); handleReportButton(event, newValue)}}>Report</MenuItem>
               </Menu>
               {/* -------------------------------- */}
                {/* <Button variant="underlined" color="inherit" onClick={handleReportButton}>Add Spot</Button> */}
-      {open && <Dialog open={open} onClose={handleClose}>
+      {open && <Dialog open={open} onClose={(event) => {event.stopPropagation(); handleClose();}}>
         <DialogTitle>Report Study Spot</DialogTitle>
         
         <DialogContent>
@@ -161,7 +164,7 @@ export default function StudyCard(props) {
             variant='standard'/>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
+          <Button onClick={(event) => {event.stopPropagation(); handleClose();}}>Cancel</Button>
           <Button type="submit">Submit for Review</Button>
         </DialogActions>
         
@@ -191,10 +194,11 @@ export default function StudyCard(props) {
         </Box>
       </CardContent>
       <CardActions sx={{ mt: -3 }}>
-        <Box sx={{ ml: 4, mb: 2}}>
+        <Box sx={{ ml: 4, mb: 2, ':hover': { cursor: 'pointer' }}}>
             <Button sx={{ bgcolor: 'black', color: 'white', ':hover': { bgcolor: 'gray'}}} size="small">Comments</Button>
         </Box>
       </CardActions>
+      </CardActionArea>
     </Card>
   );
 }
