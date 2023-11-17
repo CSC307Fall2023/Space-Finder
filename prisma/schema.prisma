@@ -17,6 +17,7 @@ model User {
   password     String
   bio          String
   school       String
+  profilePic   String
   studySpaces  studySpace[]
   comments     comment[]
   reservations reservation[]

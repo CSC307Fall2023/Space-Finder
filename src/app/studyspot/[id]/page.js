@@ -1,5 +1,4 @@
 "use client"
-import React, { useState } from 'react';
 import {
   Box,
   Typography,
@@ -13,8 +12,10 @@ import {
 } from '@mui/material';
 import { BarChart } from '@mui/x-charts/BarChart';
 import { GoogleMap, Marker, InfoWindow, useJsApiLoader } from '@react-google-maps/api';
-import Comments from '../components/comments';
-import AmenitiesList from '../components/amenitiesList';
+import Comments from '../../components/comments';
+import AmenitiesList from '../../components/amenitiesList';
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 
 function StudySpot(props) {
     const [open, setOpen] = useState(false);
@@ -22,15 +23,25 @@ function StudySpot(props) {
         id: 'google-map-script',
         googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_API_KEY
     })
-
+    const params = useParams();
+    const [spot, setSpot] = useState({});
     const [map, setMap] = React.useState(null)
     const [center, setCenter] = React.useState({
         lat: 35.305,
         lng: -120.6625
     })
 
+    useEffect(() => {
+        fetch('/api/study-spaces/' + params.id, { method: 'GET', params: {id: params.id} })
+          .then((response) => response.ok && response.json())
+          .then((data) => {
+            setSpot(data);
+            setCenter({lat: data.latitude, lng: data.longitude});
+            console.log(data);
+          });
+      }, []);
+
     const onLoad = React.useCallback(function callback(map) {
-        // This is just an example of getting and using the map instance!!! don't just blindly copy!
         const bounds = new window.google.maps.LatLngBounds(center);
         map.fitBounds(bounds);
 
@@ -54,10 +65,10 @@ function StudySpot(props) {
           <Paper elevation={3}>
             <Box p={2}>
               <Typography variant="h4" gutterBottom>
-                Frank E. Pilling Room 103
+                {spot.name}
               </Typography>
               <Typography variant="body1" gutterBottom>
-                1234 Cal Poly Way
+                {spot.building}
               </Typography>
               <Typography variant="body1" gutterBottom>
                 School: Cal Poly SLO
@@ -102,8 +113,8 @@ function StudySpot(props) {
                     <Marker onClick={toggleOpen} position={center}>
                         {open && <InfoWindow onCloseClick={() => toggleOpen()}>
                                 <Box>
-                                    <Typography>Study Spot 1: Very Busy</Typography>
-                                    <Typography>Lat: 1.23, Long: 45.67</Typography>
+                                    <Typography>{spot.name}: Very Busy</Typography>
+                                    <Typography>Lat: {spot.latitude.toFixed(2)}, Long: {spot.longitude.toFixed(2)}</Typography>
                                 </Box>
                             </InfoWindow>}
                     </Marker>

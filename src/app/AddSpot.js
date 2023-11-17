@@ -70,7 +70,29 @@ export default function AddSpot() {
     } else {
         console.log("Geolocation is not supported by this browser.");
     }
-};
+  };
+
+  const submitSpot = async () => {
+    fetch('/api/study-spaces', {
+      method: 'POST',
+      body: JSON.stringify({
+        name: formState.spotName,
+        building: formState.building,
+        longitude: markerPosition.lng,
+        latitude: markerPosition.lat,
+        capacity: formState.capacity,
+        rating: 0,
+        busyness: 0,
+        img: "https://content-calpoly-edu.s3.amazonaws.com/foundation/1/images/20130820_science-math_app_0072%20%2875%25%29.jpg",
+      })
+    }).then((res) => {
+      if (res.status === 200) {
+        handleClose();
+      } else {
+        setError(true);
+      }
+    });
+  }
 
   return (
     <>
@@ -86,6 +108,7 @@ export default function AddSpot() {
             <Alert severity="error">There was an issue submitting the study spot, please adjust the fields and try again.</Alert>
           ) : null }
           <TextField
+            onChange={(e) => setFormState({...formState, spotName: e.target.value})}
             autoFocus
             margin="dense"
             id="spotName"
@@ -98,6 +121,7 @@ export default function AddSpot() {
      
           />
           <TextField
+            onChange={(e) => setFormState({...formState, building: e.target.value})}
             margin="dense"
             id="building"
             name="building"
@@ -107,6 +131,7 @@ export default function AddSpot() {
             fullWidth
             variant='standard'/>
           <TextField
+            onChange={(e) => setFormState({...formState, capacity: e.target.value})}
             margin="dense"
             name="capacity"
             id="SpotCap"
@@ -124,7 +149,7 @@ export default function AddSpot() {
                     zoom={15}
                     onLoad={onLoad}
                     onUnmount={onUnmount}
-                    onDblClick={onMapDoubleClick}
+                    onClick={onMapDoubleClick}
                     disableZoom={true}
                     options={{
                         styles: [
@@ -138,11 +163,11 @@ export default function AddSpot() {
                   <Marker position={markerPosition}></Marker>
                 </GoogleMap>
         ) : <></>}  
-        <DialogContentText>Please mark (double click) the spot on the map</DialogContentText>
+        <DialogContentText>Please mark (click) the spot on the map</DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
-          <Button type="submit">Submit for Review</Button>
+          <Button onClick={submitSpot} type="submit">Submit for Review</Button>
         </DialogActions>
         
       </Dialog>}

@@ -2,6 +2,16 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { checkLoggedIn } from "@/lib/auth";
 
+export async function GET(request, { params}) {
+    const id = parseInt(params.id);
+    const space = await prisma.studySpace.findUnique({
+      where: {
+        id: id
+      }
+    });
+    return NextResponse.json(space);
+  }
+
 export async function PUT(request, { params }) {
   const loggedInData = await checkLoggedIn();
   const id = +params.id;

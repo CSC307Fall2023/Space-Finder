@@ -1,11 +1,11 @@
 "use client"
-import React from 'react'
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react'
 import { Button, Box, Typography } from '@mui/material';
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api';
 
 function Map() {
     const [open, setOpen] = useState(false);
+    const [studySpots, setStudySpots] = useState([]);
     const { isLoaded } = useJsApiLoader({
         id: 'google-map-script',
         googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_API_KEY
@@ -32,13 +32,6 @@ function Map() {
 
     const [markerPosition, setMarkerPosition] = React.useState(center);
 
-    const onMapDoubleClick = React.useCallback((event) => {
-        setMarkerPosition({
-            lat: event.latLng.lat(),
-            lng: event.latLng.lng()
-        });
-    }, []);
-
     function toggleOpen() {
         setOpen(!open);
     }
@@ -60,37 +53,45 @@ function Map() {
         }
     };
 
-        return isLoaded ? (
-                <GoogleMap
-                    mapContainerStyle={{width: '100%', height: '85vh'}}
-                    center={center}
-                    zoom={15}
-                    onLoad={onLoad}
-                    onUnmount={onUnmount}
-                    disableDoubleClickZoom={true}
-                    onDblClick={onMapDoubleClick}
-                    options={{
-                        styles: [
-                            {
-                                elementType: 'labels.icon',
-                                stylers: [{visibility: 'off'}]
-                            }
-                        ]
-                    }}
-                >
-                    <Box sx={{display: 'flex', justifyContent: 'center', mt: 2}}>
-                            <Button onClick={findLocation} sx={{backgroundColor: 'white', boxShadow: 2}}>Find Me</Button>
-                    </Box>
-                    <Marker onClick={toggleOpen} position={markerPosition} title='My Marker!'>
-                        {open && <InfoWindow onCloseClick={() => toggleOpen()}>
-                                <Box>
-                                    <Typography>Study Spot 1: Very Busy</Typography>
-                                    <Typography>Lat: 1.23, Long: 45.67</Typography>
-                                </Box>
-                            </InfoWindow>}
-                    </Marker>
-                </GoogleMap>
-        ) : <></>
-    }
-    export default React.memo(Map)
+  useEffect(() => {
+    fetch('/api/study-spaces', { method: 'GET', })
+      .then((response) => response.ok && response.json())
+      .then((data) => {
+        setStudySpots(data);
+        console.log(data);
+      });
+  }, []);
 
+    return isLoaded ? (
+        <GoogleMap
+            mapContainerStyle={{width: '100%', height: '85vh'}}
+            center={center}
+            zoom={15}
+            onLoad={onLoad}
+            onUnmount={onUnmount}
+            disableDoubleClickZoom={true}
+            options={{
+                styles: [
+                    {
+                        elementType: 'labels.icon',
+                        stylers: [{visibility: 'off'}]
+                    }
+                ]
+            }}>
+            <Box sx={{display: 'flex', justifyContent: 'center', mt: 2}}>
+                <Button onClick={findLocation} sx={{backgroundColor: 'white', boxShadow: 2}}>Find Me</Button>
+            </Box>
+            {studySpots.map((spot) => (
+                <Marker onClick={toggleOpen} key={spot.id} position={{ lat: spot.latitude, lng: spot.longitude }} title={spot.name}>
+                    {open && <InfoWindow onCloseClick={() => toggleOpen()}>
+                        <Box>
+                            <Typography>{spot.name}</Typography>
+                            <Typography>Lat: {spot.latitude.toFixed(2)}, Long: {spot.longitude.toFixed(2)}</Typography>
+                        </Box>
+                    </InfoWindow>}
+                </Marker>
+            ))}
+        </GoogleMap>
+    ) : <></>
+}
+export default React.memo(Map)

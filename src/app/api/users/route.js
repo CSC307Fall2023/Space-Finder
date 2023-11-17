@@ -35,6 +35,7 @@ export async function POST(request) {
           password: hashedPassword,
           bio: "",
           school: "", 
+          profilePic: "",
         }
       });
     } catch (e) {
