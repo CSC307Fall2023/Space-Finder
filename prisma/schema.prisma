@@ -73,6 +73,7 @@ model reservation {
   ownerId      Int
   studySpace   studySpace @relation(fields: [studySpaceId], references: [id])
   studySpaceId Int
+  checkIn      DateTime   @default(now())
 }
 
 model report {
