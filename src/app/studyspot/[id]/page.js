@@ -39,6 +39,7 @@ function StudySpot(props) {
         id: 'google-map-script',
         googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_API_KEY
     })
+    const [capacity, setCapacity] = useState(0);
     const params = useParams();
     const [spot, setSpot] = useState({});
     const [anchorEl, setAnchorEl] = React.useState(null);
@@ -59,6 +60,7 @@ function StudySpot(props) {
             setSpot(data);
             setAmenities(data.amenities);
             setRatingNum(data.avgRating);
+            setCapacity(data.capacity);
             setCenter({lat: data.latitude, lng: data.longitude});
             fetch(`/api/ratings/${data.id}`, { method: 'GET'})
               .then((response) => response.ok && response.json())
@@ -111,10 +113,63 @@ function StudySpot(props) {
       setOpen(!open);
     }
 
-      const handleCheckIn = () => {
-        setAnchorEl(null); // Close the menu when "Check In" is clicked
-        displayCheckInMessage(); // Function to display a pop-up message
-      };
+      
+    const handleCheckIn = () => {
+      setAnchorEl(null); 
+      fetch(`/api/reservations`, { method: 'GET', })
+      .then((response) => response.ok && response.json())
+      .then((reservations) => {
+        console.log(reservations);
+        let checkedIn = false;
+        if (reservations) {
+          reservations.forEach((reservation) => {
+            console.log(reservation);
+            const currentTime = new Date();
+            // Get the time the user checked in
+            const checkInTime = new Date(reservation.checkIn);
+            // Get the difference between the current time and the check in time
+            const difference = currentTime - checkInTime;
+            // If the difference is less than 3600000 milliseconds (1 hour), then the user has already checked in
+            if (difference < 3600000) {
+              checkedIn = true;
+            }
+          });
+        }
+
+        if (checkedIn) {
+          displayAlreadyCheckedInMessage();
+        } else {
+          fetch(`/api/reservations`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              ssid: +params.id,
+            }),
+          }).then((response) => {
+            if (response.ok) {
+              return response.json();
+            } else {
+              throw new Error('Error checking in');
+            }
+          }).then((data) => {
+            console.log(data);
+          }).catch((error) => {
+            console.log(error);
+          });
+          displayCheckInMessage(); 
+        }
+      });
+    };
+
+    const displayAlreadyCheckedInMessage = () => {
+      alert('Sorry, you have already checked in to a spot.');
+    };
+    
+    const displayCheckInMessage = () => {
+      alert('Yay! You\'ve checked in. You have reserved this spot for an hour. If you would like to study here longer, please check in again later.');
+    };
 
       const getReportDialog = () => {
         return (<Dialog open={reportOpen} onClose={() => setReportOpen(false)}>
@@ -173,10 +228,6 @@ function StudySpot(props) {
         
       </Dialog>);
     }
-    
-      const displayCheckInMessage = () => {
-        alert('Yay! You\'ve checked in.');
-      };
 
       const displayFlaggedSpotMessage = () => {
         alert('This spot has been flagged, sorry for the inconvenience.');
@@ -348,15 +399,12 @@ function StudySpot(props) {
           <Typography variant="h4" component="h3">
             Busyness
           </Typography>
-          <Slider
-            aria-label="Rating"
-            size="medium"
-            defaultValue={2}
-            step={1}
-            min={0}
-            max={5}
-            marks={[{ value: 0, label: '0' }, { value: 5, label: '5' }]}
-            valueLabelDisplay="auto"
+          <Slider 
+            disabled
+            defaultValue={1 + Math.floor(Math.random() * 30)}
+            aria-label="Disabled slider"
+            max={capacity}
+            marks={[{ value: 0, label: '0' }, { value: capacity, label: `${capacity}` }]}
           />
           <Box mt={2}>
             <Typography variant="h4" component="h3">
@@ -367,13 +415,13 @@ function StudySpot(props) {
             xAxis={[
               {
                 id: 'Time',
-                data: ['1 PM', '2 PM', '3 PM', '4 PM', '5 PM', '6 PM'],
+                data: ['1 AM', '2 AM', '3 AM', '4 AM', '5 AM', '6 AM', '7 AM', '8AM', '9 AM', '10 AM', '11 AM', '12 PM', '1 PM', '2 PM', '3 PM', '4PM', '5 PM', '6 PM', '7 PM', '8 PM', '9 PM', '10 PM', '11 PM', '12 AM'],
                 scaleType: 'band',
               },
             ]}
             series={[
               {
-                data: [20, 33, 81, 45, 21, 76],
+                data: [0, 1 , 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 , 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
               },
             ]}
             width={500}

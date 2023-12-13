@@ -34,6 +34,7 @@ export default function StudyCard(props) {
     const [ formState, setFormState ] = useState({});
     const [name, setName] = useState('');
     const [spotName, setSpotName] = useState('');
+    const [checkedIn, setCheckedIn] = useState(false); 
     const [reason, setReason] = useState('');
     const [ error, setError ] = useState(false);
     const router = useRouter();
@@ -103,13 +104,60 @@ export default function StudyCard(props) {
     const handleMenuClose = () => {
       setAnchorEl(null);
     };
+
     const handleCheckIn = () => {
       setAnchorEl(null); 
-      displayCheckInMessage(); 
+      fetch(`/api/reservations`, { method: 'GET', })
+      .then((response) => response.ok && response.json())
+      .then((reservations) => {
+        let checkedIn = false;
+        if (reservations) {
+          reservations.forEach((reservation) => {
+            const currentTime = new Date();
+            // Get the time the user checked in
+            const checkInTime = new Date(reservation.checkIn);
+            // Get the difference between the current time and the check in time
+            const difference = currentTime - checkInTime;
+            // If the difference is less than 3600000 milliseconds (1 hour), then the user has already checked in
+            if (difference < 3600000) {
+              checkedIn = true;
+            }
+          });
+        }
+
+        if (checkedIn) {
+          displayAlreadyCheckedInMessage();
+        } else {
+          fetch(`/api/reservations`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              ssid: id,
+            }),
+          }).then((response) => {
+            if (response.ok) {
+              return response.json();
+            } else {
+              throw new Error('Error checking in');
+            }
+          }).then((data) => {
+            console.log(data);
+          }).catch((error) => {
+            console.log(error);
+          });
+          displayCheckInMessage(); 
+        }
+      });
     };
-  
+
+    const displayAlreadyCheckedInMessage = () => {
+      alert('Sorry, you have already checked in to a spot.');
+    };
+    
     const displayCheckInMessage = () => {
-      alert('Yay! You\'ve checked in.');
+      alert('Yay! You\'ve checked in. You have reserved this spot for an hour. If you would like to study here longer, please check in again later.');
     };
     
     const handleRatingChange = async (event, newValue) => {

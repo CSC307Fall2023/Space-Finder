@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "reservation" ADD COLUMN     "checkIn" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
