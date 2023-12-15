@@ -3,6 +3,16 @@ import prisma from "@/lib/db";
 import bcrypt from 'bcryptjs';
 import { checkLoggedIn } from "@/lib/auth";
 
+export async function GET(request, { params }) {
+  const userId = parseInt(params.id);
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId
+    }
+  });
+  return NextResponse.json(user);
+}
+
 export async function PUT(request, { params }) {
   const loggedInData = await checkLoggedIn();
   const id = +params.id;

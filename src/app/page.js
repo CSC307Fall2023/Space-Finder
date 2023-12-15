@@ -127,7 +127,7 @@ export default function Home() {
           {studies.map((study, index) => (
             <StudyCard key={index} id={study.id} studyName={study.name} saved={saved.includes(study.id)}
             distance={getDistance(location.lat, location.lng, study.latitude, study.longitude).toFixed(2)}
-            liveStatus={study.liveStatus} rating={study.avgRating} amenities={study.amenities} image={study.img} />
+            liveStatus={Math.ceil(study.busyness)} rating={study.avgRating} amenities={study.amenities} image={study.img} />
           ))}
         </Box>
       </Box>

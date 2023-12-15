@@ -381,7 +381,7 @@ function StudySpot(props) {
               <Typography variant="h4" component="h3">
                 Comments
               </Typography>
-              <Comments />
+              {spot.id >= 0 ? <Comments spaceId={spot.id} /> : <Typography>Loading...</Typography>}
             </Box>
           </Paper>
         </Grid>

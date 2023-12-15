@@ -1,4 +1,3 @@
-
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import Divider from '@mui/material/Divider';
@@ -13,11 +12,11 @@ import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import { useSession } from 'next-auth/react';
 
-export default function Comments() {
+export default function Comments(props) {
+    const {spaceId} = props;
     const { data: session, status } = useSession();
     const [comments, setComments] = useState([]);
     const [commentText, setCommentText] = useState('');
-
 
   const handleCommentChange = (event) => {
     setCommentText(event.target.value);
@@ -30,6 +29,17 @@ export default function Comments() {
         rating: 0,
         voted: null, 
       };
+
+      fetch('/api/comments', {
+        method: 'POST',
+        body: JSON.stringify({
+          ssid: spaceId,
+          text: newComment.text,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
       setComments([...comments, newComment]);
       setCommentText('');
@@ -69,16 +79,51 @@ export default function Comments() {
     setComments(updatedComments);
   };
 
+  useEffect(() => {
+    fetch(`/api/comments/${spaceId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        const dbComments = []
+        for (const comment in data) {
+          console.log(data[comment])
+          fetch(`/api/users/${data[comment].ownerId}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          })
+            .then((response) => response.json())
+            .then((user) => {
+              const newComment = {
+                text: data[comment].text,
+                rating: data[comment].votes,
+                voted: null,
+                user: user.username
+              };
+              console.log(newComment)
+              dbComments.push(newComment);
+            })
+        }
+
+        setComments(dbComments);
+      });
+  }, []);
+
   const renderComments = (commentsArray) => {
     return commentsArray.map((comment, index) => (
       <>
         <ListItem alignItems="flex-start" key={index}>
           <ListItemAvatar>
-            <Avatar alt={`User${index + 1}`} src={`/static/images/avatar/${index + 1}.jpg`} />
+            <Avatar alt={`User${comment.user}`} src={`/static/images/avatar/${index + 1}.jpg`} />
           </ListItemAvatar>
           <ListItemText
             primary={comment.text}
-            secondary={`— User ${index + 1} | Rating: ${comment.rating}`}
+            secondary={`— ${comment.user} | Rating: ${comment.rating}`}
           />
           <IconButton
             aria-label="upvote"

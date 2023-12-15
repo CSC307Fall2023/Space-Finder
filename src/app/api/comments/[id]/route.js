@@ -25,6 +25,19 @@ export async function PUT(request, { params }) {
   return NextResponse.json({error: 'not signed in'}, {status: 403});
 }
 
+export async function GET(request, { params }) {
+  const ssid = parseInt(params.id);
+  console.log(ssid);
+  const comments = await prisma.comment.findMany({
+    where: {
+      studySpaceId: {
+        equals: ssid
+      }
+    }
+  });
+  return NextResponse.json(comments);
+}
+
 export async function DELETE(request, { params }) {
   const loggedInData = await checkLoggedIn();
   const id = parseInt(params.id);
